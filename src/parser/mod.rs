@@ -4177,10 +4177,20 @@ impl<'a> Parser<'a> {
     /// 
     /// Does not advance the current token.
     fn get_prev_comment(&self) -> Option<Comment> {
-        match &self.get_previous_token().token {
-            Token::Whitespace(Whitespace::Comment(c)) => Some(c.clone()),
-            _ => None,
+        // assumes you have self.tokens and self.index; adjust if you use accessors
+        let mut i: isize = self.index as isize - 1;
+        while i >= 0 {
+            match &self.tokens[i as usize].token {
+                Token::Whitespace(Whitespace::Space | Whitespace::Tab | Whitespace::Newline) => {
+                    i -= 1;
+                }
+                Token::Whitespace(Whitespace::Comment(c)) => {
+                    return Some(c.clone()); // ensure Comment: Clone
+                }
+                _ => break, // hit a real token (e.g., ',' or '(') → no leading comment
+            }
         }
+        None
     }
 
 
