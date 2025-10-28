@@ -941,7 +941,6 @@ impl<'a> Tokenizer<'a> {
         Ok(())
     }
 
-
     // Tokenize the identifier or keywords in `ch`
     fn tokenize_identifier_or_keyword(
         &self,
@@ -1274,7 +1273,7 @@ impl<'a> Tokenizer<'a> {
                     // we should yield the dot as a dedicated token so compound identifiers
                     // starting with digits can be parsed correctly.
                     if s == "." && self.dialect.supports_numeric_prefix() {
-                         if let Some(Token::Word(_)) = prev_token {
+                        if let Some(Token::Word(_)) = prev_token {
                             return Ok(Some(Token::Period));
                         }
                     }
@@ -3184,10 +3183,12 @@ mod tests {
 
         let dialect = GenericDialect {};
         let tokens = Tokenizer::new(&dialect, &sql).tokenize().unwrap();
-        let expected = vec![Token::Whitespace(Whitespace::Comment(Comment::SingleLineComment {
-            prefix: "--".to_string(),
-            comment: "this is a comment".to_string(),
-        }))];
+        let expected = vec![Token::Whitespace(Whitespace::Comment(
+            Comment::SingleLineComment {
+                prefix: "--".to_string(),
+                comment: "this is a comment".to_string(),
+            },
+        ))];
         compare(expected, tokens);
     }
 
@@ -3246,7 +3247,9 @@ mod tests {
                 Token::make_keyword("SELECT"),
                 Token::Whitespace(Whitespace::Space),
                 Token::Number("1".to_string(), false),
-                Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment(" a /* b */ c ".to_string()))),
+                Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment(
+                    " a /* b */ c ".to_string(),
+                ))),
                 Token::Number("0".to_string(), false),
             ],
         );
@@ -3260,7 +3263,9 @@ mod tests {
                 Token::make_keyword("select"),
                 Token::Whitespace(Whitespace::Space),
                 Token::Number("1".to_string(), false),
-                Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment("/**/".to_string()))),
+                Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment(
+                    "/**/".to_string(),
+                ))),
                 Token::Number("0".to_string(), false),
             ],
         );
@@ -3292,7 +3297,9 @@ mod tests {
         let tokens = Tokenizer::new(&dialect, &sql).tokenize().unwrap();
         let expected = vec![
             Token::Whitespace(Whitespace::Newline),
-            Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment("* Comment *".to_string()))),
+            Token::Whitespace(Whitespace::Comment(Comment::MultiLineComment(
+                "* Comment *".to_string(),
+            ))),
             Token::Whitespace(Whitespace::Newline),
         ];
         compare(expected, tokens);

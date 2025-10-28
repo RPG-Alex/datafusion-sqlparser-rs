@@ -32,17 +32,20 @@ use recursion::RecursionCounter;
 use IsLateral::*;
 use IsOptional::*;
 
-use crate::ast::helpers::{
-    key_value_options::{
-        KeyValueOption, KeyValueOptionKind, KeyValueOptions, KeyValueOptionsDelimiter,
-    },
-    stmt_create_table::{CreateTableBuilder, CreateTableConfiguration},
-};
 use crate::ast::Statement::CreatePolicy;
 use crate::ast::*;
 use crate::dialect::*;
 use crate::keywords::{Keyword, ALL_KEYWORDS};
 use crate::tokenizer::*;
+use crate::{
+    ast::helpers::{
+        key_value_options::{
+            KeyValueOption, KeyValueOptionKind, KeyValueOptions, KeyValueOptionsDelimiter,
+        },
+        stmt_create_table::{CreateTableBuilder, CreateTableConfiguration},
+    },
+    keywords::CREATE,
+};
 use sqlparser::parser::ParserState::ColumnDefinition;
 
 mod alter;
@@ -4174,25 +4177,46 @@ impl<'a> Parser<'a> {
     }
 
     /// Returns a copy of the previously found Whitespace Comment
-    /// 
+    ///
     /// Does not advance the current token.
     fn get_prev_comment(&self) -> Option<Comment> {
-        // assumes you have self.tokens and self.index; adjust if you use accessors
         let mut i: isize = self.index as isize - 1;
         while i >= 0 {
             match &self.tokens[i as usize].token {
-                Token::Whitespace(Whitespace::Space | Whitespace::Tab | Whitespace::Newline) => {
+                Token::Whitespace(Whitespace::Space | Whitespace::Tab | Whitespace::Newline)
+                | Token::Word(Word {
+                    keyword: Keyword::CREATE,
+                    ..
+                }) => {
                     i -= 1;
                 }
-                Token::Whitespace(Whitespace::Comment(c)) => {
-                    return Some(c.clone()); // ensure Comment: Clone
+                // Table needs to be handled by going backwards through whitespace, including potential interstitial comments
+                Token::Word(Word {
+                    keyword: Keyword::TABLE,
+                    ..
+                }) => {
+                    i -= 1;
+                    while i >= 0 {
+                        match &self.tokens[i as usize].token {
+                            Token::Whitespace(
+                                Whitespace::Space | Whitespace::Tab | Whitespace::Newline | Whitespace::Comment(_),
+                            ) => {
+                                i -= 1;
+                                continue;
+                            }
+                            _ => break,
+                        }
+                    }
+                    continue;
                 }
-                _ => break, // hit a real token (e.g., ',' or '(') → no leading comment
+                Token::Whitespace(Whitespace::Comment(c)) => {
+                    return Some(c.clone());
+                }
+                _ => break,
             }
         }
         None
     }
-
 
     /// Returns a reference to the next token
     ///
@@ -17784,9 +17808,9 @@ impl Word {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_utils::{all_dialects, TestedDialects};
-
     use super::*;
+    use crate::test_utils::{all_dialects, TestedDialects};
+    use crate::tokenizer::Comment::{MultiLineComment, SingleLineComment};
 
     #[test]
     fn test_prev_index() {
@@ -18557,15 +18581,54 @@ mod tests {
     }
 
     #[test]
-    fn test_leading_comments_for_create_table() {
-        todo!()
-    }
-    #[test]
-    fn test_leading_comments_for_column() {
-        todo!()
-    }
-    #[test]
-    fn test_interstitial_comments() {
+    fn interstitial_and_leading_comments_multiline() {
+        use crate::tokenizer::Comment::MultiLineComment;
 
+        let sql_ml = "/* leading table comment */ CREATE /* interstitial comment to ignore */ TABLE t (id /* interstitial column comment to ignore */ INT, /* leading */ name TEXT)";
+        let mut stmts = Parser::parse_sql(&GenericDialect {}, sql_ml).unwrap();
+        match stmts.remove(0) {
+            Statement::CreateTable(ct) => {
+                assert_eq!(
+                    ct.leading_comment.clone().unwrap(),
+                    MultiLineComment(" leading table comment ".to_string())
+                );
+                let id = &ct.columns[0];
+                assert_eq!(id.leading_comment, None);
+                let name = &ct.columns[1];
+                assert_eq!(
+                    name.leading_comment.clone().unwrap(),
+                    MultiLineComment(" leading ".to_string())
+                );
+            }
+            s => panic!("expected CreateTable, got {:?}", s),
+        }
     }
+
+    #[test]
+    fn interstitial_and_leading_comments_singleline() {
+        use crate::tokenizer::Comment::{MultiLineComment, SingleLineComment};
+
+        let sql_sl = "-- leading table comment
+    CREATE /* interstitial comment to ignore */ TABLE t (id /* interstitial column comment to ignore */ INT,
+    -- leading
+    name TEXT)";
+        let mut stmts = Parser::parse_sql(&GenericDialect {}, sql_sl).unwrap();
+        match stmts.remove(0) {
+            Statement::CreateTable(ct) => {
+                assert_eq!(
+                    ct.leading_comment.clone().unwrap(),
+                    SingleLineComment { comment: " leading table comment\n".to_string(), prefix: "--".to_string() }
+                );
+                let id = &ct.columns[0];
+                assert_eq!(id.leading_comment, None);
+                let name = &ct.columns[1];
+                assert_eq!(
+                    name.leading_comment.clone().unwrap(),
+                    SingleLineComment { comment: " leading\n".to_string(), prefix: "--".to_string() }
+                );
+            }
+            s => panic!("expected CreateTable, got {:?}", s),
+        }
+    }
+
 }
