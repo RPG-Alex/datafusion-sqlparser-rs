@@ -859,6 +859,7 @@ impl<'a> Tokenizer<'a> {
     ///
     /// assert_eq!(tokens, vec![
     ///   Token::make_word("SELECT", None),
+    ///   Token::Whitespace(Whitespace::Space),
     ///   Token::SingleQuotedString("foo".to_string()),
     /// ]);
     pub fn new(dialect: &'a dyn Dialect, query: &'a str) -> Self {
@@ -928,27 +929,18 @@ impl<'a> Tokenizer<'a> {
             line: 1,
             col: 1,
         };
-        let mut last_char_was_word: bool = false;
+
         let mut location = state.location();
-        while let Some(token) =
-            self.next_token(&mut state, buf.last().map(|t| &t.token), last_char_was_word)?
-        {
-            last_char_was_word = matches!(token, Token::Word(_));
+        while let Some(token) = self.next_token(&mut state, buf.last().map(|t| &t.token))? {
             let span = location.span_to(state.location());
-            if matches!(token, Token::Whitespace(_)) {
-                if matches!(buf.last().map(|t| &t.token), Some(Token::Colon)) {
-                    return self.tokenizer_error(
-                        state.location(),
-                        "Unexpected whitespace after ':'".to_string(),
-                    );
-                }
-            } else {
-                buf.push(TokenWithSpan { token, span });
-            }
+
+            buf.push(TokenWithSpan { token, span });
+
             location = state.location();
         }
         Ok(())
     }
+
 
     // Tokenize the identifier or keywords in `ch`
     fn tokenize_identifier_or_keyword(
@@ -981,7 +973,6 @@ impl<'a> Tokenizer<'a> {
         &self,
         chars: &mut State,
         prev_token: Option<&Token>,
-        last_char_was_word: bool,
     ) -> Result<Option<Token>, TokenizerError> {
         match chars.peek() {
             Some(&ch) => match ch {
@@ -1239,7 +1230,7 @@ impl<'a> Tokenizer<'a> {
                     // if the prev token is not a word, then this is not a valid sql
                     // word or number.
                     if ch == '.' && chars.peekable.clone().nth(1) == Some('_') {
-                        if last_char_was_word {
+                        if let Some(Token::Word(_)) = prev_token {
                             chars.next();
                             return Ok(Some(Token::Period));
                         }
@@ -1283,7 +1274,7 @@ impl<'a> Tokenizer<'a> {
                     // we should yield the dot as a dedicated token so compound identifiers
                     // starting with digits can be parsed correctly.
                     if s == "." && self.dialect.supports_numeric_prefix() {
-                        if last_char_was_word {
+                         if let Some(Token::Word(_)) = prev_token {
                             return Ok(Some(Token::Period));
                         }
                     }
