@@ -541,7 +541,7 @@ impl<'a> Parser<'a> {
         if let Some(statement) = self.dialect.parse_statement(self) {
             return statement;
         }
-
+        let leading_comment: Option<Comment> = self.parse_leading_comment();
         let next_token = self.next_token();
         match &next_token.token {
             Token::Word(w) => match w.keyword {
@@ -583,7 +583,7 @@ impl<'a> Parser<'a> {
                     self.parse_detach_duckdb_database()
                 }
                 Keyword::MSCK => self.parse_msck(),
-                Keyword::CREATE => self.parse_create(),
+                Keyword::CREATE => self.parse_create(leading_comment),
                 Keyword::CACHE => self.parse_cache_table(),
                 Keyword::DROP => self.parse_drop(),
                 Keyword::DISCARD => self.parse_discard(),
@@ -4179,40 +4179,17 @@ impl<'a> Parser<'a> {
     /// Returns a copy of the previously found Whitespace Comment
     ///
     /// Does not advance the current token.
-    fn get_prev_comment(&self) -> Option<Comment> {
+    fn get_previous_comment(&self) -> Option<Comment> {
         let mut i: isize = self.index as isize - 1;
         while i >= 0 {
             match &self.tokens[i as usize].token {
-                Token::Whitespace(Whitespace::Space | Whitespace::Tab | Whitespace::Newline)
-                | Token::Word(Word {
-                    keyword: Keyword::CREATE,
-                    ..
-                }) => {
+                Token::Whitespace(Whitespace::Space | Whitespace::Tab | Whitespace::Newline) => {
                     i -= 1;
-                }
-                // Table needs to be handled by going backwards through whitespace, including potential interstitial comments
-                Token::Word(Word {
-                    keyword: Keyword::TABLE,
-                    ..
-                }) => {
-                    i -= 1;
-                    while i >= 0 {
-                        match &self.tokens[i as usize].token {
-                            Token::Whitespace(
-                                Whitespace::Space | Whitespace::Tab | Whitespace::Newline | Whitespace::Comment(_),
-                            ) => {
-                                i -= 1;
-                                continue;
-                            }
-                            _ => break,
-                        }
-                    }
-                    continue;
                 }
                 Token::Whitespace(Whitespace::Comment(c)) => {
-                    return Some(c.clone());
+                    return Some(c.clone()); 
                 }
-                _ => break,
+                _ => break, 
             }
         }
         None
@@ -4270,6 +4247,19 @@ impl<'a> Parser<'a> {
             found.span.start
         )
     }
+
+    /// Parses a single leading comment (if any)
+    pub fn parse_leading_comment(&mut self) -> Option<Comment> {
+        // TODO: Need to merge parse_leading with get_previous_token - same problem with whitespace
+        if let Token::Whitespace(Whitespace::Comment(ref comment)) = self.peek_token_ref().token {
+            let comment = comment.clone();
+            self.advance_token();
+            Some(comment)
+        } else {
+            None
+        }
+    }
+
 
     /// If the current token is the `expected` keyword, consume it and returns
     /// true. Otherwise, no tokens are consumed and returns false.
@@ -4762,7 +4752,7 @@ impl<'a> Parser<'a> {
     }
 
     /// Parse a SQL CREATE statement
-    pub fn parse_create(&mut self) -> Result<Statement, ParserError> {
+    pub fn parse_create(&mut self, leading_comment: Option<Comment>) -> Result<Statement, ParserError> {
         let or_replace = self.parse_keywords(&[Keyword::OR, Keyword::REPLACE]);
         let or_alter = self.parse_keywords(&[Keyword::OR, Keyword::ALTER]);
         let local = self.parse_one_of_keywords(&[Keyword::LOCAL]).is_some();
@@ -4782,7 +4772,7 @@ impl<'a> Parser<'a> {
             && self.parse_one_of_keywords(&[Keyword::PERSISTENT]).is_some();
         let create_view_params = self.parse_create_view_params()?;
         if self.parse_keyword(Keyword::TABLE) {
-            self.parse_create_table(or_replace, temporary, global, transient)
+            self.parse_create_table(leading_comment, or_replace, temporary, global, transient)
         } else if self.peek_keyword(Keyword::MATERIALIZED)
             || self.peek_keyword(Keyword::VIEW)
             || self.peek_keywords(&[Keyword::SECURE, Keyword::MATERIALIZED, Keyword::VIEW])
@@ -7435,13 +7425,13 @@ impl<'a> Parser<'a> {
 
     pub fn parse_create_table(
         &mut self,
+        leading_comment: Option<Comment>,
         or_replace: bool,
         temporary: bool,
         global: Option<bool>,
         transient: bool,
     ) -> Result<Statement, ParserError> {
         let allow_unquoted_hyphen = dialect_of!(self is BigQueryDialect);
-        let leading_comment: Option<Comment> = self.get_prev_comment();
         let if_not_exists = self.parse_keywords(&[Keyword::IF, Keyword::NOT, Keyword::EXISTS]);
         let table_name = self.parse_object_name(allow_unquoted_hyphen)?;
 
@@ -7988,7 +7978,7 @@ impl<'a> Parser<'a> {
 
     pub fn parse_column_def(&mut self) -> Result<ColumnDef, ParserError> {
         // Check and retrieve comment before column name if exists
-        let leading_comment: Option<Comment> = self.get_prev_comment();
+        let leading_comment: Option<Comment> = self.get_previous_comment();
         let col_name = self.parse_identifier()?;
         let data_type = if self.is_column_type_sqlite_unspecified() {
             DataType::Unspecified
@@ -18609,7 +18599,7 @@ mod tests {
         use crate::tokenizer::Comment::{MultiLineComment, SingleLineComment};
 
         let sql_sl = "-- leading table comment
-    CREATE /* interstitial comment to ignore */ TABLE t (id /* interstitial column comment to ignore */ INT,
+    CREATE -- interstitial comment to ignore TABLE t (id -- interstitial column comment to ignore INT,
     -- leading
     name TEXT)";
         let mut stmts = Parser::parse_sql(&GenericDialect {}, sql_sl).unwrap();
