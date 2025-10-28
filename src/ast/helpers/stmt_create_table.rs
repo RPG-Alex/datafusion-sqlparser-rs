@@ -47,6 +47,7 @@ use crate::tokenizer::Comment;
 /// let builder = CreateTableBuilder::new(ObjectName::from(vec![Ident::new("table_name")]))
 ///    .if_not_exists(true)
 ///    .columns(vec![ColumnDef {
+///        leading_comment: None,
 ///        name: Ident::new("c1"),
 ///        data_type: DataType::Int(None),
 ///        options: vec![],

@@ -18555,4 +18555,17 @@ mod tests {
             assert!(Parser::parse_sql(&GenericDialect, &sql).is_err());
         }
     }
+
+    #[test]
+    fn test_leading_comments_for_create_table() {
+        todo!()
+    }
+    #[test]
+    fn test_leading_comments_for_column() {
+        todo!()
+    }
+    #[test]
+    fn test_interstitial_comments() {
+
+    }
 }
