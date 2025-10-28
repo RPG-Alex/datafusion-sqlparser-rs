@@ -212,6 +212,7 @@ fn parse_create_table_auto_increment() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "bar".into(),
                     data_type: DataType::Int(None),
                     options: vec![
@@ -244,6 +245,7 @@ fn parse_create_table_auto_increment() {
 #[test]
 fn parse_create_table_primary_key_asc_desc() {
     let expected_column_def = |kind| ColumnDef {
+        leading_comment: None,
         name: "bar".into(),
         data_type: DataType::Int(None),
         options: vec![
@@ -290,11 +292,13 @@ fn parse_create_sqlite_quote() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::with_quote('"', "KEY"),
                         data_type: DataType::Int(None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::with_quote('[', "INDEX"),
                         data_type: DataType::Int(None),
                         options: vec![],

@@ -356,6 +356,7 @@ fn data_type_timestamp_ntz() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "x".into(),
                     data_type: DataType::TimestampNtz,
                     options: vec![],

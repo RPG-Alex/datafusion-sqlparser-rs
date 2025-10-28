@@ -362,6 +362,7 @@ fn parse_create_table_with_defaults() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "customer_id".into(),
                         data_type: DataType::Integer(None),
                         options: vec![ColumnOptionDef {
@@ -372,6 +373,7 @@ fn parse_create_table_with_defaults() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "store_id".into(),
                         data_type: DataType::SmallInt(None),
                         options: vec![ColumnOptionDef {
@@ -380,6 +382,7 @@ fn parse_create_table_with_defaults() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "first_name".into(),
                         data_type: DataType::CharacterVarying(Some(
                             CharacterLength::IntegerLength {
@@ -393,6 +396,7 @@ fn parse_create_table_with_defaults() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "last_name".into(),
                         data_type: DataType::CharacterVarying(Some(
                             CharacterLength::IntegerLength {
@@ -414,6 +418,7 @@ fn parse_create_table_with_defaults() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "email".into(),
                         data_type: DataType::CharacterVarying(Some(
                             CharacterLength::IntegerLength {
@@ -424,6 +429,7 @@ fn parse_create_table_with_defaults() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "address_id".into(),
                         data_type: DataType::SmallInt(None),
                         options: vec![ColumnOptionDef {
@@ -432,6 +438,7 @@ fn parse_create_table_with_defaults() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "activebool".into(),
                         data_type: DataType::Boolean,
                         options: vec![
@@ -448,6 +455,7 @@ fn parse_create_table_with_defaults() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "create_date".into(),
                         data_type: DataType::Date,
                         options: vec![
@@ -462,6 +470,7 @@ fn parse_create_table_with_defaults() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "last_update".into(),
                         data_type: DataType::Timestamp(None, TimezoneInfo::WithoutTimeZone),
                         options: vec![
@@ -476,6 +485,7 @@ fn parse_create_table_with_defaults() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "active".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -846,6 +856,7 @@ fn parse_alter_table_add_columns() {
                         column_keyword: true,
                         if_not_exists: false,
                         column_def: ColumnDef {
+                            leading_comment: None,
                             name: "a".into(),
                             data_type: DataType::Text,
                             options: vec![],
@@ -856,6 +867,7 @@ fn parse_alter_table_add_columns() {
                         column_keyword: true,
                         if_not_exists: false,
                         column_def: ColumnDef {
+                            leading_comment: None,
                             name: "b".into(),
                             data_type: DataType::Int(None),
                             options: vec![],
@@ -5017,31 +5029,37 @@ fn parse_create_table_with_alias() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "int8_col".into(),
                         data_type: DataType::Int8(None),
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "int4_col".into(),
                         data_type: DataType::Int4(None),
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "int2_col".into(),
                         data_type: DataType::Int2(None),
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "float8_col".into(),
                         data_type: DataType::Float8,
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "float4_col".into(),
                         data_type: DataType::Float4,
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "bool_col".into(),
                         data_type: DataType::Bool,
                         options: vec![]
@@ -5063,11 +5081,13 @@ fn parse_create_table_with_partition_by() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "b".into(),
                         data_type: DataType::Text,
                         options: vec![]
@@ -5972,6 +5992,7 @@ fn parse_trigger_related_functions() {
     assert_eq!(
         create_table,
         CreateTable {
+            leading_comment: None,
             or_replace: false,
             temporary: false,
             external: false,
@@ -5984,21 +6005,25 @@ fn parse_trigger_related_functions() {
             name: ObjectName::from(vec![Ident::new("emp")]),
             columns: vec![
                 ColumnDef {
+                    leading_comment: None,
                     name: "empname".into(),
                     data_type: DataType::Text,
                     options: vec![],
                 },
                 ColumnDef {
+                    leading_comment: None,
                     name: "salary".into(),
                     data_type: DataType::Integer(None),
                     options: vec![],
                 },
                 ColumnDef {
+                    leading_comment: None,
                     name: "last_date".into(),
                     data_type: DataType::Timestamp(None, TimezoneInfo::None),
                     options: vec![],
                 },
                 ColumnDef {
+                    leading_comment: None,
                     name: "last_user".into(),
                     data_type: DataType::Text,
                     options: vec![],
@@ -6347,11 +6372,13 @@ fn parse_varbit_datatype() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "x".into(),
                         data_type: DataType::VarBit(None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "y".into(),
                         data_type: DataType::VarBit(Some(42)),
                         options: vec![],
@@ -6397,6 +6424,7 @@ fn parse_ts_datatypes() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "x".into(),
                     data_type: DataType::TsVector,
                     options: vec![],
@@ -6411,6 +6439,7 @@ fn parse_ts_datatypes() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "x".into(),
                     data_type: DataType::TsQuery,
                     options: vec![],

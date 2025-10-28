@@ -502,6 +502,7 @@ impl Spanned for Use {
 impl Spanned for CreateTable {
     fn span(&self) -> Span {
         let CreateTable {
+            leading_comment: _,
             or_replace: _,    // bool
             temporary: _,     // bool
             external: _,      // bool
@@ -572,6 +573,7 @@ impl Spanned for ColumnDef {
             name,
             data_type: _, // enum
             options,
+            leading_comment: _,
         } = self;
 
         union_spans(core::iter::once(name.span).chain(options.iter().map(|i| i.span())))

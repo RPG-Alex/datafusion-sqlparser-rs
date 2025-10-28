@@ -1846,6 +1846,7 @@ fn parse_create_table_with_valid_options() {
         assert_eq!(
             ms_and_generic().verified_stmt(sql),
             Statement::CreateTable(CreateTable {
+                leading_comment: None,
                 or_replace: false,
                 temporary: false,
                 external: false,
@@ -1861,6 +1862,7 @@ fn parse_create_table_with_valid_options() {
                 },],),
                 columns: vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident {
                             value: "column_a".to_string(),
                             quote_style: None,
@@ -1870,6 +1872,7 @@ fn parse_create_table_with_valid_options() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident {
                             value: "column_b".to_string(),
                             quote_style: None,
@@ -1879,6 +1882,7 @@ fn parse_create_table_with_valid_options() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident {
                             value: "column_c".to_string(),
                             quote_style: None,
@@ -2036,6 +2040,7 @@ fn parse_create_table_with_identity_column() {
         assert_eq!(
             ms_and_generic().verified_stmt(sql),
             Statement::CreateTable(CreateTable {
+                leading_comment: None,
                 or_replace: false,
                 temporary: false,
                 external: false,
@@ -2051,6 +2056,7 @@ fn parse_create_table_with_identity_column() {
                     span: Span::empty(),
                 },],),
                 columns: vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident {
                         value: "columnA".to_string(),
                         quote_style: None,
@@ -2298,6 +2304,7 @@ fn parse_mssql_varbinary_max_length() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("var_binary_col"),
                     data_type: Varbinary(Some(BinaryLength::Max)),
 
@@ -2323,6 +2330,7 @@ fn parse_mssql_varbinary_max_length() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("var_binary_col"),
                     data_type: Varbinary(Some(BinaryLength::IntegerLength { length: 50 })),
 

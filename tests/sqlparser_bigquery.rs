@@ -464,6 +464,7 @@ fn parse_create_table_with_unquoted_hyphen() {
             );
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("x"),
                     data_type: DataType::Int64,
                     options: vec![]
@@ -501,6 +502,7 @@ fn parse_create_table_with_options() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("x"),
                         data_type: DataType::Int64,
                         options: vec![
@@ -522,6 +524,7 @@ fn parse_create_table_with_options() {
                         ]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("y"),
                         data_type: DataType::Bool,
                         options: vec![ColumnOptionDef {
@@ -601,6 +604,7 @@ fn parse_nested_data_types() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("x"),
                         data_type: DataType::Struct(
                             vec![
@@ -622,6 +626,7 @@ fn parse_nested_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("y"),
                         data_type: DataType::Array(ArrayElemTypeDef::AngleBracket(Box::new(
                             DataType::Struct(

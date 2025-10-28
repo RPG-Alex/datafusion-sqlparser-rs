@@ -633,6 +633,7 @@ fn parse_create_table_auto_increment() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("bar"),
                     data_type: DataType::Int(None),
                     options: vec![
@@ -742,6 +743,7 @@ fn parse_create_table_primary_and_unique_key() {
                 assert_eq!(
                     vec![
                         ColumnDef {
+                            leading_comment: None,
                             name: Ident::new("id"),
                             data_type: DataType::Int(None),
                             options: vec![
@@ -765,6 +767,7 @@ fn parse_create_table_primary_and_unique_key() {
                             ],
                         },
                         ColumnDef {
+                            leading_comment: None,
                             name: Ident::new("bar"),
                             data_type: DataType::Int(None),
                             options: vec![ColumnOptionDef {
@@ -1186,11 +1189,13 @@ fn parse_create_table_set_enum() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar"),
                         data_type: DataType::Set(vec!["a".to_string(), "b".to_string()]),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("baz"),
                         data_type: DataType::Enum(
                             vec![
@@ -1222,6 +1227,7 @@ fn parse_create_table_engine_default_charset() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("id"),
                     data_type: DataType::Int(Some(11)),
                     options: vec![],
@@ -1264,6 +1270,7 @@ fn parse_create_table_collate() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("id"),
                     data_type: DataType::Int(Some(11)),
                     options: vec![],
@@ -1333,6 +1340,7 @@ fn parse_create_table_comment_character_set() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("s"),
                     data_type: DataType::Text,
                     options: vec![
@@ -1386,6 +1394,7 @@ fn parse_quote_identifiers() {
             assert_eq!(name.to_string(), "`PRIMARY`");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::with_quote('`', "BEGIN"),
                     data_type: DataType::Int(None),
                     options: vec![ColumnOptionDef {
@@ -1653,26 +1662,31 @@ fn parse_create_table_with_minimum_display_width() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_tinyint"),
                         data_type: DataType::TinyInt(Some(3)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_smallint"),
                         data_type: DataType::SmallInt(Some(5)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_mediumint"),
                         data_type: DataType::MediumInt(Some(6)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_int"),
                         data_type: DataType::Int(Some(11)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_bigint"),
                         data_type: DataType::BigInt(Some(20)),
                         options: vec![],
@@ -1694,26 +1708,31 @@ fn parse_create_table_unsigned() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_tinyint"),
                         data_type: DataType::TinyIntUnsigned(Some(3)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_smallint"),
                         data_type: DataType::SmallIntUnsigned(Some(5)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_mediumint"),
                         data_type: DataType::MediumIntUnsigned(Some(13)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_int"),
                         data_type: DataType::IntUnsigned(Some(11)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_bigint"),
                         data_type: DataType::BigIntUnsigned(Some(20)),
                         options: vec![],
@@ -1736,26 +1755,31 @@ fn parse_signed_data_types() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_tinyint"),
                         data_type: DataType::TinyInt(Some(3)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_smallint"),
                         data_type: DataType::SmallInt(Some(5)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_mediumint"),
                         data_type: DataType::MediumInt(Some(13)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_int"),
                         data_type: DataType::Int(Some(11)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_bigint"),
                         data_type: DataType::BigInt(Some(20)),
                         options: vec![],
@@ -1780,16 +1804,19 @@ fn parse_deprecated_mysql_unsigned_data_types() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_decimal"),
                         data_type: DataType::DecimalUnsigned(ExactNumberInfo::None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_decimal_prec"),
                         data_type: DataType::DecimalUnsigned(ExactNumberInfo::Precision(10)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_decimal_scale"),
                         data_type: DataType::DecimalUnsigned(ExactNumberInfo::PrecisionAndScale(
                             10, 2
@@ -1797,31 +1824,37 @@ fn parse_deprecated_mysql_unsigned_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_dec"),
                         data_type: DataType::DecUnsigned(ExactNumberInfo::None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_dec_prec"),
                         data_type: DataType::DecUnsigned(ExactNumberInfo::Precision(10)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_dec_scale"),
                         data_type: DataType::DecUnsigned(ExactNumberInfo::PrecisionAndScale(10, 2)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_float"),
                         data_type: DataType::FloatUnsigned(ExactNumberInfo::None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_float_prec"),
                         data_type: DataType::FloatUnsigned(ExactNumberInfo::Precision(10)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_float_scale"),
                         data_type: DataType::FloatUnsigned(ExactNumberInfo::PrecisionAndScale(
                             10, 2
@@ -1829,16 +1862,19 @@ fn parse_deprecated_mysql_unsigned_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_double"),
                         data_type: DataType::DoubleUnsigned(ExactNumberInfo::None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_double_prec"),
                         data_type: DataType::DoubleUnsigned(ExactNumberInfo::Precision(10)),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_double_scale"),
                         data_type: DataType::DoubleUnsigned(ExactNumberInfo::PrecisionAndScale(
                             10, 2
@@ -1846,11 +1882,13 @@ fn parse_deprecated_mysql_unsigned_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_real"),
                         data_type: DataType::RealUnsigned,
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar_double_precision"),
                         data_type: DataType::DoublePrecisionUnsigned,
                         options: vec![],
@@ -2761,6 +2799,7 @@ fn parse_alter_table_add_column() {
                     column_keyword: true,
                     if_not_exists: false,
                     column_def: ColumnDef {
+                        leading_comment: None,
                         name: "b".into(),
                         data_type: DataType::Int(None),
                         options: vec![],
@@ -2789,6 +2828,7 @@ fn parse_alter_table_add_column() {
                     column_keyword: true,
                     if_not_exists: false,
                     column_def: ColumnDef {
+                        leading_comment: None,
                         name: "b".into(),
                         data_type: DataType::Int(None),
                         options: vec![],
@@ -2827,6 +2867,7 @@ fn parse_alter_table_add_columns() {
                         column_keyword: true,
                         if_not_exists: false,
                         column_def: ColumnDef {
+                            leading_comment: None,
                             name: "a".into(),
                             data_type: DataType::Text,
                             options: vec![],
@@ -2837,6 +2878,7 @@ fn parse_alter_table_add_columns() {
                         column_keyword: true,
                         if_not_exists: false,
                         column_def: ColumnDef {
+                            leading_comment: None,
                             name: "b".into(),
                             data_type: DataType::Int(None),
                             options: vec![],
@@ -3326,6 +3368,7 @@ fn parse_table_column_option_on_update() {
             assert_eq!(name.to_string(), "foo");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::with_quote('`', "modification_time"),
                     data_type: DataType::Datetime(None),
                     options: vec![ColumnOptionDef {
@@ -3618,6 +3661,7 @@ fn parse_create_table_with_column_collate() {
             assert_eq!(name.to_string(), "tb");
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("id"),
                     data_type: DataType::Text,
                     options: vec![

@@ -3730,6 +3730,7 @@ fn parse_create_table() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "name".into(),
                         data_type: DataType::Varchar(Some(CharacterLength::IntegerLength {
                             length: 100,
@@ -3741,6 +3742,7 @@ fn parse_create_table() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lat".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![ColumnOptionDef {
@@ -3749,11 +3751,13 @@ fn parse_create_table() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lng".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "constrained".into(),
                         data_type: DataType::Int(None),
                         options: vec![
@@ -3800,6 +3804,7 @@ fn parse_create_table() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "ref".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -3818,6 +3823,7 @@ fn parse_create_table() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "ref2".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -3947,6 +3953,7 @@ fn parse_create_table_with_constraint_characteristics() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "name".into(),
                         data_type: DataType::Varchar(Some(CharacterLength::IntegerLength {
                             length: 100,
@@ -3958,6 +3965,7 @@ fn parse_create_table_with_constraint_characteristics() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lat".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![ColumnOptionDef {
@@ -3966,6 +3974,7 @@ fn parse_create_table_with_constraint_characteristics() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lng".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![],
@@ -4112,6 +4121,7 @@ fn parse_create_table_column_constraint_characteristics() {
                 assert_eq!(
                     columns,
                     vec![ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -4232,11 +4242,13 @@ fn parse_create_table_hive_array() {
                     columns,
                     vec![
                         ColumnDef {
+                            leading_comment: None,
                             name: Ident::new("name"),
                             data_type: DataType::Int(None),
                             options: vec![],
                         },
                         ColumnDef {
+                            leading_comment: None,
                             name: Ident::new("val"),
                             data_type: DataType::Array(expected),
                             options: vec![],
@@ -4602,6 +4614,7 @@ fn parse_create_external_table() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "name".into(),
                         data_type: DataType::Varchar(Some(CharacterLength::IntegerLength {
                             length: 100,
@@ -4613,6 +4626,7 @@ fn parse_create_external_table() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lat".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![ColumnOptionDef {
@@ -4621,6 +4635,7 @@ fn parse_create_external_table() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "lng".into(),
                         data_type: DataType::Double(ExactNumberInfo::None),
                         options: vec![],
@@ -4670,6 +4685,7 @@ fn parse_create_or_replace_external_table() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "name".into(),
                     data_type: DataType::Varchar(Some(CharacterLength::IntegerLength {
                         length: 100,
@@ -12189,6 +12205,7 @@ fn test_parse_inline_comment() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: Ident::new("id".to_string()),
                     data_type: DataType::Int(None),
                     options: vec![ColumnOptionDef {
@@ -14865,6 +14882,7 @@ fn parse_create_table_with_enum_types() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("foo"),
                         data_type: DataType::Enum(
                             vec![
@@ -14886,6 +14904,7 @@ fn parse_create_table_with_enum_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("bar"),
                         data_type: DataType::Enum(
                             vec![
@@ -14907,6 +14926,7 @@ fn parse_create_table_with_enum_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("baz"),
                         data_type: DataType::Enum(
                             vec![
@@ -17320,11 +17340,13 @@ fn parse_invisible_column() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "foo".into(),
                         data_type: DataType::Int(None),
                         options: vec![]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "bar".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -17348,6 +17370,7 @@ fn parse_invisible_column() {
                     column_keyword: true,
                     if_not_exists: false,
                     column_def: ColumnDef {
+                        leading_comment: None,
                         name: "bar".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {

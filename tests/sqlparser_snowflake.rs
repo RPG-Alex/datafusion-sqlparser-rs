@@ -366,6 +366,7 @@ fn test_snowflake_create_table_column_comment() {
             assert_eq!("my_table", name.to_string());
             assert_eq!(
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "a".into(),
                     data_type: DataType::String(None),
                     options: vec![ColumnOptionDef {
@@ -565,10 +566,10 @@ fn test_snowflake_single_line_tokenize() {
         Token::make_keyword("CREATE"),
         Token::Whitespace(Whitespace::Space),
         Token::make_keyword("TABLE"),
-        Token::Whitespace(Whitespace::SingleLineComment {
+        Token::Whitespace(Whitespace::Comment(Comment::SingleLineComment {
             prefix: "#".to_string(),
             comment: " this is a comment \n".to_string(),
-        }),
+        })),
         Token::make_word("table_1", None),
     ];
 
@@ -582,10 +583,10 @@ fn test_snowflake_single_line_tokenize() {
         Token::Whitespace(Whitespace::Space),
         Token::make_keyword("TABLE"),
         Token::Whitespace(Whitespace::Space),
-        Token::Whitespace(Whitespace::SingleLineComment {
+        Token::Whitespace(Whitespace::Comment(Comment::SingleLineComment {
             prefix: "//".to_string(),
             comment: " this is a comment \n".to_string(),
-        }),
+        })),
         Token::make_word("table_1", None),
     ];
 
@@ -609,6 +610,7 @@ fn test_snowflake_create_table_with_autoincrement_columns() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -622,6 +624,7 @@ fn test_snowflake_create_table_with_autoincrement_columns() {
                         }]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "b".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -640,6 +643,7 @@ fn test_snowflake_create_table_with_autoincrement_columns() {
                         }]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "c".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -653,6 +657,7 @@ fn test_snowflake_create_table_with_autoincrement_columns() {
                         }]
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "d".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -690,6 +695,7 @@ fn test_snowflake_create_table_with_collated_column() {
             assert_eq!(
                 columns,
                 vec![ColumnDef {
+                    leading_comment: None,
                     name: "a".into(),
                     data_type: DataType::Text,
                     options: vec![ColumnOptionDef {
@@ -734,6 +740,7 @@ fn test_snowflake_create_table_with_columns_masking_policy() {
                 assert_eq!(
                     columns,
                     vec![ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -768,6 +775,7 @@ fn test_snowflake_create_table_with_columns_projection_policy() {
                 assert_eq!(
                     columns,
                     vec![ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -805,6 +813,7 @@ fn test_snowflake_create_table_with_columns_tags() {
                 assert_eq!(
                     columns,
                     vec![ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
@@ -845,6 +854,7 @@ fn test_snowflake_create_table_with_several_column_options() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: "a".into(),
                         data_type: DataType::Int(None),
                         options: vec![
@@ -886,6 +896,7 @@ fn test_snowflake_create_table_with_several_column_options() {
                         ],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: "b".into(),
                         data_type: DataType::Text,
                         options: vec![

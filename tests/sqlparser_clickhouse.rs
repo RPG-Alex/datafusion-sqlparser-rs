@@ -531,6 +531,7 @@ fn parse_optimize_table() {
 
 fn column_def(name: Ident, data_type: DataType) -> ColumnDef {
     ColumnDef {
+        leading_comment: None,
         name,
         data_type,
         options: vec![],
@@ -619,6 +620,7 @@ fn parse_create_table_with_nullable() {
                         DataType::Nullable(Box::new(DataType::Datetime64(9, None)))
                     ),
                     ColumnDef {
+                        leading_comment: None,
                         name: "d".into(),
                         data_type: DataType::Date32,
                         options: vec![ColumnOptionDef {
@@ -651,6 +653,7 @@ fn parse_create_table_with_nested_data_types() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("i"),
                         data_type: DataType::Nested(vec![
                             column_def(
@@ -667,6 +670,7 @@ fn parse_create_table_with_nested_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("k"),
                         data_type: DataType::Array(ArrayElemTypeDef::Parenthesis(Box::new(
                             DataType::Tuple(vec![
@@ -685,6 +689,7 @@ fn parse_create_table_with_nested_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("l"),
                         data_type: DataType::Tuple(vec![
                             StructField {
@@ -703,6 +708,7 @@ fn parse_create_table_with_nested_data_types() {
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("m"),
                         data_type: DataType::Map(
                             Box::new(DataType::String(None)),
@@ -737,11 +743,13 @@ fn parse_create_table_with_primary_key() {
             assert_eq!(
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::with_quote('`', "i"),
                         data_type: DataType::Int(None),
                         options: vec![],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::with_quote('`', "k"),
                         data_type: DataType::Int(None),
                         options: vec![],
@@ -820,6 +828,7 @@ fn parse_create_table_with_variant_default_expressions() {
                 columns,
                 vec![
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("a"),
                         data_type: DataType::Datetime(None),
                         options: vec![ColumnOptionDef {
@@ -841,6 +850,7 @@ fn parse_create_table_with_variant_default_expressions() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("b"),
                         data_type: DataType::Datetime(None),
                         options: vec![ColumnOptionDef {
@@ -862,6 +872,7 @@ fn parse_create_table_with_variant_default_expressions() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("c"),
                         data_type: DataType::Datetime(None),
                         options: vec![ColumnOptionDef {
@@ -870,6 +881,7 @@ fn parse_create_table_with_variant_default_expressions() {
                         }],
                     },
                     ColumnDef {
+                        leading_comment: None,
                         name: Ident::new("d"),
                         data_type: DataType::String(None),
                         options: vec![ColumnOptionDef {

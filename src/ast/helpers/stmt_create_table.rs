@@ -32,6 +32,7 @@ use crate::ast::{
 };
 
 use crate::parser::ParserError;
+use crate::tokenizer::Comment;
 
 /// Builder for create table statement variant ([1]).
 ///
@@ -64,6 +65,7 @@ use crate::parser::ParserError;
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
 pub struct CreateTableBuilder {
+    pub leading_comment: Option<Comment>,
     pub or_replace: bool,
     pub temporary: bool,
     pub external: bool,
@@ -120,6 +122,7 @@ pub struct CreateTableBuilder {
 impl CreateTableBuilder {
     pub fn new(name: ObjectName) -> Self {
         Self {
+            leading_comment: None,
             or_replace: false,
             temporary: false,
             external: false,
@@ -173,6 +176,12 @@ impl CreateTableBuilder {
             require_user: false,
         }
     }
+
+    pub fn leading_comment(mut self, leading_comment: Option<Comment>) -> Self {
+        self.leading_comment = leading_comment;
+        self
+    }
+
     pub fn or_replace(mut self, or_replace: bool) -> Self {
         self.or_replace = or_replace;
         self
@@ -433,6 +442,7 @@ impl CreateTableBuilder {
 
     pub fn build(self) -> Statement {
         CreateTable {
+            leading_comment: self.leading_comment,
             or_replace: self.or_replace,
             temporary: self.temporary,
             external: self.external,
@@ -497,6 +507,7 @@ impl TryFrom<Statement> for CreateTableBuilder {
     fn try_from(stmt: Statement) -> Result<Self, Self::Error> {
         match stmt {
             Statement::CreateTable(CreateTable {
+                leading_comment,
                 or_replace,
                 temporary,
                 external,
@@ -549,6 +560,7 @@ impl TryFrom<Statement> for CreateTableBuilder {
                 initialize,
                 require_user,
             }) => Ok(Self {
+                leading_comment,
                 or_replace,
                 temporary,
                 external,

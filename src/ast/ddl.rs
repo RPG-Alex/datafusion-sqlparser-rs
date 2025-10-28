@@ -47,7 +47,7 @@ use crate::ast::{
 };
 use crate::display_utils::{DisplayCommaSeparated, Indent, NewLine, SpaceOrNewline};
 use crate::keywords::Keyword;
-use crate::tokenizer::{Span, Token};
+use crate::tokenizer::{Comment, Span, Token};
 
 /// Index column type.
 #[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Hash)]
@@ -1221,10 +1221,14 @@ pub struct ColumnDef {
     pub name: Ident,
     pub data_type: DataType,
     pub options: Vec<ColumnOptionDef>,
+    pub leading_comment: Option<Comment>,
 }
 
 impl fmt::Display for ColumnDef {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if let Some(leading_comment) = &self.leading_comment {
+            write!(f, "{leading_comment}")?;
+        }
         if self.data_type == DataType::Unspecified {
             write!(f, "{}", self.name)?;
         } else {
@@ -2203,6 +2207,7 @@ impl fmt::Display for CreateIndex {
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[cfg_attr(feature = "visitor", derive(Visit, VisitMut))]
 pub struct CreateTable {
+    pub leading_comment: Option<Comment>,
     pub or_replace: bool,
     pub temporary: bool,
     pub external: bool,

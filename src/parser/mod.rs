@@ -4173,6 +4173,17 @@ impl<'a> Parser<'a> {
         self.token_at(self.index.saturating_sub(2))
     }
 
+    /// Returns a copy of the previously found Whitespace Comment
+    /// 
+    /// Does not advance the current token.
+    fn get_prev_comment(&self) -> Option<Comment> {
+        match &self.get_previous_token().token {
+            Token::Whitespace(Whitespace::Comment(c)) => Some(c.clone()),
+            _ => None,
+        }
+    }
+
+
     /// Returns a reference to the next token
     ///
     /// Does not advance the current token.
@@ -7396,6 +7407,7 @@ impl<'a> Parser<'a> {
         transient: bool,
     ) -> Result<Statement, ParserError> {
         let allow_unquoted_hyphen = dialect_of!(self is BigQueryDialect);
+        let leading_comment: Option<Comment> = self.get_prev_comment();
         let if_not_exists = self.parse_keywords(&[Keyword::IF, Keyword::NOT, Keyword::EXISTS]);
         let table_name = self.parse_object_name(allow_unquoted_hyphen)?;
 
@@ -7479,6 +7491,7 @@ impl<'a> Parser<'a> {
         };
 
         Ok(CreateTableBuilder::new(table_name)
+            .leading_comment(leading_comment)
             .temporary(temporary)
             .columns(columns)
             .constraints(constraints)
@@ -7940,6 +7953,8 @@ impl<'a> Parser<'a> {
     }
 
     pub fn parse_column_def(&mut self) -> Result<ColumnDef, ParserError> {
+        // Check and retrieve comment before column name if exists
+        let leading_comment: Option<Comment> = self.get_prev_comment();
         let col_name = self.parse_identifier()?;
         let data_type = if self.is_column_type_sqlite_unspecified() {
             DataType::Unspecified
@@ -7968,6 +7983,7 @@ impl<'a> Parser<'a> {
             name: col_name,
             data_type,
             options,
+            leading_comment,
         })
     }
 

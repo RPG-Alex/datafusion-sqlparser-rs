@@ -61,6 +61,7 @@ fn test_struct() {
     assert_eq!(
         column_defs(statement),
         vec![ColumnDef {
+            leading_comment: None,
             name: "s".into(),
             data_type: struct_type1.clone(),
             options: vec![],
@@ -72,6 +73,7 @@ fn test_struct() {
     assert_eq!(
         column_defs(statement),
         vec![ColumnDef {
+            leading_comment: None,
             name: "s".into(),
             data_type: DataType::Array(ArrayElemTypeDef::SquareBracket(
                 Box::new(struct_type1),
@@ -120,6 +122,7 @@ fn test_struct() {
     assert_eq!(
         column_defs(statement),
         vec![ColumnDef {
+            leading_comment: None,
             name: "s".into(),
             data_type: DataType::Array(ArrayElemTypeDef::SquareBracket(
                 Box::new(struct_type2),
@@ -692,6 +695,7 @@ fn test_duckdb_union_datatype() {
     let stmt = duckdb_and_generic().verified_stmt(sql);
     assert_eq!(
         Statement::CreateTable(CreateTable {
+            leading_comment: Default::default(),
             or_replace: Default::default(),
             temporary: Default::default(),
             external: Default::default(),
@@ -704,6 +708,7 @@ fn test_duckdb_union_datatype() {
             name: ObjectName::from(vec!["tbl1".into()]),
             columns: vec![
                 ColumnDef {
+                    leading_comment: None,
                     name: "one".into(),
                     data_type: DataType::Union(vec![UnionField {
                         field_name: "a".into(),
@@ -712,6 +717,7 @@ fn test_duckdb_union_datatype() {
                     options: Default::default()
                 },
                 ColumnDef {
+                    leading_comment: None,
                     name: "two".into(),
                     data_type: DataType::Union(vec![
                         UnionField {
@@ -726,6 +732,7 @@ fn test_duckdb_union_datatype() {
                     options: Default::default()
                 },
                 ColumnDef {
+                    leading_comment: None,
                     name: "nested".into(),
                     data_type: DataType::Union(vec![UnionField {
                         field_name: "a".into(),
