@@ -5592,7 +5592,7 @@ impl<'a> Parser<'a> {
         }
 
         let name = self.parse_object_name(false)?;
-        let period = self.parse_trigger_period()?;
+        let period = self.maybe_parse(|parser| parser.parse_trigger_period())?;
 
         let events = self.parse_keyword_separated(Keyword::OR, Parser::parse_trigger_event)?;
         self.expect_keyword_is(Keyword::ON)?;
@@ -8050,16 +8050,32 @@ impl<'a> Parser<'a> {
             }
         } else if self.parse_keywords(&[Keyword::PRIMARY, Keyword::KEY]) {
             let characteristics = self.parse_constraint_characteristics()?;
-            Ok(Some(ColumnOption::Unique {
-                is_primary: true,
-                characteristics,
-            }))
+            Ok(Some(
+                PrimaryKeyConstraint {
+                    name: None,
+                    index_name: None,
+                    index_type: None,
+                    columns: vec![],
+                    index_options: vec![],
+                    characteristics,
+                }
+                .into(),
+            ))
         } else if self.parse_keyword(Keyword::UNIQUE) {
             let characteristics = self.parse_constraint_characteristics()?;
-            Ok(Some(ColumnOption::Unique {
-                is_primary: false,
-                characteristics,
-            }))
+            Ok(Some(
+                UniqueConstraint {
+                    name: None,
+                    index_name: None,
+                    index_type_display: KeyOrIndexDisplay::None,
+                    index_type: None,
+                    columns: vec![],
+                    index_options: vec![],
+                    characteristics,
+                    nulls_distinct: NullsDistinctOption::None,
+                }
+                .into(),
+            ))
         } else if self.parse_keyword(Keyword::REFERENCES) {
             let foreign_table = self.parse_object_name(false)?;
             // PostgreSQL allows omitting the column list and
@@ -8104,7 +8120,14 @@ impl<'a> Parser<'a> {
             // since `CHECK` requires parentheses, we can parse the inner expression in ParserState::Normal
             let expr: Expr = self.with_state(ParserState::Normal, |p| p.parse_expr())?;
             self.expect_token(&Token::RParen)?;
-            Ok(Some(ColumnOption::Check(expr)))
+            Ok(Some(
+                CheckConstraint {
+                    name: None, // Column-level check constraints don't have names
+                    expr: Box::new(expr),
+                    enforced: None, // Could be extended later to support MySQL ENFORCED/NOT ENFORCED
+                }
+                .into(),
+            ))
         } else if self.parse_keyword(Keyword::AUTO_INCREMENT)
             && dialect_of!(self is MySqlDialect | GenericDialect)
         {
@@ -9718,6 +9741,7 @@ impl<'a> Parser<'a> {
             Keyword::BLANKSASNULL,
             Keyword::BZIP2,
             Keyword::CLEANPATH,
+            Keyword::COMPUPDATE,
             Keyword::CSV,
             Keyword::DATEFORMAT,
             Keyword::DELIMITER,
@@ -9738,7 +9762,9 @@ impl<'a> Parser<'a> {
             Keyword::PARQUET,
             Keyword::PARTITION,
             Keyword::REGION,
+            Keyword::REMOVEQUOTES,
             Keyword::ROWGROUPSIZE,
+            Keyword::STATUPDATE,
             Keyword::TIMEFORMAT,
             Keyword::TRUNCATECOLUMNS,
             Keyword::ZSTD,
@@ -9759,6 +9785,20 @@ impl<'a> Parser<'a> {
             Some(Keyword::BLANKSASNULL) => CopyLegacyOption::BlankAsNull,
             Some(Keyword::BZIP2) => CopyLegacyOption::Bzip2,
             Some(Keyword::CLEANPATH) => CopyLegacyOption::CleanPath,
+            Some(Keyword::COMPUPDATE) => {
+                let preset = self.parse_keyword(Keyword::PRESET);
+                let enabled = match self.parse_one_of_keywords(&[
+                    Keyword::TRUE,
+                    Keyword::FALSE,
+                    Keyword::ON,
+                    Keyword::OFF,
+                ]) {
+                    Some(Keyword::TRUE) | Some(Keyword::ON) => Some(true),
+                    Some(Keyword::FALSE) | Some(Keyword::OFF) => Some(false),
+                    _ => None,
+                };
+                CopyLegacyOption::CompUpdate { preset, enabled }
+            }
             Some(Keyword::CSV) => CopyLegacyOption::Csv({
                 let mut opts = vec![];
                 while let Some(opt) =
@@ -9847,10 +9887,24 @@ impl<'a> Parser<'a> {
                 let region = self.parse_literal_string()?;
                 CopyLegacyOption::Region(region)
             }
+            Some(Keyword::REMOVEQUOTES) => CopyLegacyOption::RemoveQuotes,
             Some(Keyword::ROWGROUPSIZE) => {
                 let _ = self.parse_keyword(Keyword::AS);
                 let file_size = self.parse_file_size()?;
                 CopyLegacyOption::RowGroupSize(file_size)
+            }
+            Some(Keyword::STATUPDATE) => {
+                let enabled = match self.parse_one_of_keywords(&[
+                    Keyword::TRUE,
+                    Keyword::FALSE,
+                    Keyword::ON,
+                    Keyword::OFF,
+                ]) {
+                    Some(Keyword::TRUE) | Some(Keyword::ON) => Some(true),
+                    Some(Keyword::FALSE) | Some(Keyword::OFF) => Some(false),
+                    _ => None,
+                };
+                CopyLegacyOption::StatUpdate(enabled)
             }
             Some(Keyword::TIMEFORMAT) => {
                 let _ = self.parse_keyword(Keyword::AS);

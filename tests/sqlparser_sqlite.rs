@@ -217,10 +217,14 @@ fn parse_create_table_auto_increment() {
                     options: vec![
                         ColumnOptionDef {
                             name: None,
-                            option: ColumnOption::Unique {
-                                is_primary: true,
-                                characteristics: None
-                            },
+                            option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                                name: None,
+                                index_name: None,
+                                index_type: None,
+                                columns: vec![],
+                                index_options: vec![],
+                                characteristics: None,
+                            }),
                         },
                         ColumnOptionDef {
                             name: None,
@@ -245,10 +249,14 @@ fn parse_create_table_primary_key_asc_desc() {
         options: vec![
             ColumnOptionDef {
                 name: None,
-                option: ColumnOption::Unique {
-                    is_primary: true,
+                option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                    name: None,
+                    index_name: None,
+                    index_type: None,
+                    columns: vec![],
+                    index_options: vec![],
                     characteristics: None,
-                },
+                }),
             },
             ColumnOptionDef {
                 name: None,
@@ -639,7 +647,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "trg_inherit_asset_models");
-            assert_eq!(period, TriggerPeriod::After);
+            assert_eq!(period, Some(TriggerPeriod::After));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Insert]);
             assert_eq!(table_name.to_string(), "assets");
@@ -685,7 +693,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "log_new_user");
-            assert_eq!(period, TriggerPeriod::After);
+            assert_eq!(period, Some(TriggerPeriod::After));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Insert]);
             assert_eq!(table_name.to_string(), "users");
@@ -725,7 +733,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "cleanup_orders");
-            assert_eq!(period, TriggerPeriod::After);
+            assert_eq!(period, Some(TriggerPeriod::After));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Delete]);
             assert_eq!(table_name.to_string(), "customers");
@@ -765,7 +773,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "trg_before_update");
-            assert_eq!(period, TriggerPeriod::Before);
+            assert_eq!(period, Some(TriggerPeriod::Before));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Update(Vec::new())]);
             assert_eq!(table_name.to_string(), "products");
@@ -809,7 +817,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "trg_instead_of_insert");
-            assert_eq!(period, TriggerPeriod::InsteadOf);
+            assert_eq!(period, Some(TriggerPeriod::InsteadOf));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Insert]);
             assert_eq!(table_name.to_string(), "my_view");
@@ -850,7 +858,7 @@ fn test_create_trigger() {
             assert!(!or_replace);
             assert!(!is_constraint);
             assert_eq!(name.to_string(), "temp_trigger");
-            assert_eq!(period, TriggerPeriod::After);
+            assert_eq!(period, Some(TriggerPeriod::After));
             assert!(period_before_table);
             assert_eq!(events, vec![TriggerEvent::Insert]);
             assert_eq!(table_name.to_string(), "temp_table");
@@ -863,6 +871,10 @@ fn test_create_trigger() {
         }
         _ => unreachable!("Expected CREATE TRIGGER statement"),
     }
+
+    // We test a trigger defined without a period (BEFORE/AFTER/INSTEAD OF)
+    let statement7 = "CREATE TRIGGER trg_inherit_asset_models INSERT ON assets FOR EACH ROW BEGIN INSERT INTO users (name) SELECT pam.name FROM users AS pam; END";
+    sqlite().verified_stmt(statement7);
 }
 
 #[test]

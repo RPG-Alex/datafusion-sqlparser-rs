@@ -3763,10 +3763,14 @@ fn parse_create_table() {
                             },
                             ColumnOptionDef {
                                 name: Some("pkey".into()),
-                                option: ColumnOption::Unique {
-                                    is_primary: true,
-                                    characteristics: None
-                                },
+                                option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                                    name: None,
+                                    index_name: None,
+                                    index_type: None,
+                                    columns: vec![],
+                                    index_options: vec![],
+                                    characteristics: None,
+                                }),
                             },
                             ColumnOptionDef {
                                 name: None,
@@ -3774,14 +3778,24 @@ fn parse_create_table() {
                             },
                             ColumnOptionDef {
                                 name: None,
-                                option: ColumnOption::Unique {
-                                    is_primary: false,
-                                    characteristics: None
-                                },
+                                option: ColumnOption::Unique(UniqueConstraint {
+                                    name: None,
+                                    index_name: None,
+                                    index_type_display: KeyOrIndexDisplay::None,
+                                    index_type: None,
+                                    columns: vec![],
+                                    index_options: vec![],
+                                    characteristics: None,
+                                    nulls_distinct: NullsDistinctOption::None,
+                                }),
                             },
                             ColumnOptionDef {
                                 name: None,
-                                option: ColumnOption::Check(verified_expr("constrained > 0")),
+                                option: ColumnOption::Check(CheckConstraint {
+                                    name: None,
+                                    expr: Box::new(verified_expr("constrained > 0")),
+                                    enforced: None,
+                                }),
                             },
                         ],
                     },
@@ -4102,10 +4116,16 @@ fn parse_create_table_column_constraint_characteristics() {
                         data_type: DataType::Int(None),
                         options: vec![ColumnOptionDef {
                             name: None,
-                            option: ColumnOption::Unique {
-                                is_primary: false,
-                                characteristics: expected_value
-                            }
+                            option: ColumnOption::Unique(UniqueConstraint {
+                                name: None,
+                                index_name: None,
+                                index_type_display: KeyOrIndexDisplay::None,
+                                index_type: None,
+                                columns: vec![],
+                                index_options: vec![],
+                                characteristics: expected_value,
+                                nulls_distinct: NullsDistinctOption::None,
+                            })
                         }]
                     }],
                     "{message}"
@@ -17106,7 +17126,19 @@ fn parse_copy_options() {
             "IAM_ROLE DEFAULT ",
             "IGNOREHEADER AS 1 ",
             "TIMEFORMAT AS 'auto' ",
-            "TRUNCATECOLUMNS",
+            "TRUNCATECOLUMNS ",
+            "REMOVEQUOTES ",
+            "COMPUPDATE ",
+            "COMPUPDATE PRESET ",
+            "COMPUPDATE ON ",
+            "COMPUPDATE OFF ",
+            "COMPUPDATE TRUE ",
+            "COMPUPDATE FALSE ",
+            "STATUPDATE ",
+            "STATUPDATE ON ",
+            "STATUPDATE OFF ",
+            "STATUPDATE TRUE ",
+            "STATUPDATE FALSE",
         ),
         concat!(
             "COPY dst (c1, c2, c3) FROM 's3://redshift-downloads/tickit/category_pipe.txt' ",
@@ -17119,7 +17151,19 @@ fn parse_copy_options() {
             "IAM_ROLE DEFAULT ",
             "IGNOREHEADER 1 ",
             "TIMEFORMAT 'auto' ",
-            "TRUNCATECOLUMNS",
+            "TRUNCATECOLUMNS ",
+            "REMOVEQUOTES ",
+            "COMPUPDATE ",
+            "COMPUPDATE PRESET ",
+            "COMPUPDATE TRUE ",
+            "COMPUPDATE FALSE ",
+            "COMPUPDATE TRUE ",
+            "COMPUPDATE FALSE ",
+            "STATUPDATE ",
+            "STATUPDATE TRUE ",
+            "STATUPDATE FALSE ",
+            "STATUPDATE TRUE ",
+            "STATUPDATE FALSE",
         ),
     );
     one_statement_parses_to(

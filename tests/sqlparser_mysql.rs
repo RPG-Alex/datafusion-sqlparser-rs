@@ -638,10 +638,14 @@ fn parse_create_table_auto_increment() {
                     options: vec![
                         ColumnOptionDef {
                             name: None,
-                            option: ColumnOption::Unique {
-                                is_primary: true,
-                                characteristics: None
-                            },
+                            option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                                name: None,
+                                index_name: None,
+                                index_type: None,
+                                columns: vec![],
+                                index_options: vec![],
+                                characteristics: None,
+                            }),
                         },
                         ColumnOptionDef {
                             name: None,
@@ -743,10 +747,14 @@ fn parse_create_table_primary_and_unique_key() {
                             options: vec![
                                 ColumnOptionDef {
                                     name: None,
-                                    option: ColumnOption::Unique {
-                                        is_primary: true,
-                                        characteristics: None
-                                    },
+                                    option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                                        name: None,
+                                        index_name: None,
+                                        index_type: None,
+                                        columns: vec![],
+                                        index_options: vec![],
+                                        characteristics: None,
+                                    }),
                                 },
                                 ColumnOptionDef {
                                     name: None,
@@ -1382,10 +1390,14 @@ fn parse_quote_identifiers() {
                     data_type: DataType::Int(None),
                     options: vec![ColumnOptionDef {
                         name: None,
-                        option: ColumnOption::Unique {
-                            is_primary: true,
-                            characteristics: None
-                        },
+                        option: ColumnOption::PrimaryKey(PrimaryKeyConstraint {
+                            name: None,
+                            index_name: None,
+                            index_type: None,
+                            columns: vec![],
+                            index_options: vec![],
+                            characteristics: None,
+                        }),
                     }],
                 }],
                 columns
@@ -4022,7 +4034,7 @@ fn parse_create_trigger() {
             or_replace: false,
             is_constraint: false,
             name: ObjectName::from(vec![Ident::new("emp_stamp")]),
-            period: TriggerPeriod::Before,
+            period: Some(TriggerPeriod::Before),
             period_before_table: true,
             events: vec![TriggerEvent::Insert],
             table_name: ObjectName::from(vec![Ident::new("emp")]),

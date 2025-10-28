@@ -31,7 +31,10 @@ use sqlparser_derive::{Visit, VisitMut};
 use crate::ast::value::escape_single_quote_string;
 use crate::ast::{
     display_comma_separated, display_separated,
-    table_constraints::{ForeignKeyConstraint, TableConstraint},
+    table_constraints::{
+        CheckConstraint, ForeignKeyConstraint, PrimaryKeyConstraint, TableConstraint,
+        UniqueConstraint,
+    },
     ArgMode, AttachedToken, CommentDef, ConditionalStatements, CreateFunctionBody,
     CreateFunctionUsing, CreateTableLikeKind, CreateTableOptions, CreateViewParams, DataType, Expr,
     FileFormat, FunctionBehavior, FunctionCalledOnNull, FunctionDesc, FunctionDeterminismSpecifier,
@@ -53,6 +56,22 @@ use crate::tokenizer::{Span, Token};
 pub struct IndexColumn {
     pub column: OrderByExpr,
     pub operator_class: Option<Ident>,
+}
+
+impl From<Ident> for IndexColumn {
+    fn from(c: Ident) -> Self {
+        Self {
+            column: OrderByExpr::from(c),
+            operator_class: None,
+        }
+    }
+}
+
+impl<'a> From<&'a str> for IndexColumn {
+    fn from(c: &'a str) -> Self {
+        let ident = Ident::new(c);
+        ident.into()
+    }
 }
 
 impl fmt::Display for IndexColumn {
@@ -1555,11 +1574,10 @@ pub enum ColumnOption {
     /// [ClickHouse](https://clickhouse.com/docs/en/sql-reference/statements/create/table#default_values)
     Alias(Expr),
 
-    /// `{ PRIMARY KEY | UNIQUE } [<constraint_characteristics>]`
-    Unique {
-        is_primary: bool,
-        characteristics: Option<ConstraintCharacteristics>,
-    },
+    /// `PRIMARY KEY [<constraint_characteristics>]`
+    PrimaryKey(PrimaryKeyConstraint),
+    /// `UNIQUE [<constraint_characteristics>]`
+    Unique(UniqueConstraint),
     /// A referential integrity constraint (`REFERENCES <foreign_table> (<referred_columns>)
     /// [ MATCH { FULL | PARTIAL | SIMPLE } ]
     /// { [ON DELETE <referential_action>] [ON UPDATE <referential_action>] |
@@ -1569,7 +1587,7 @@ pub enum ColumnOption {
     /// `).
     ForeignKey(ForeignKeyConstraint),
     /// `CHECK (<expr>)`
-    Check(Expr),
+    Check(CheckConstraint),
     /// Dialect-specific options, such as:
     /// - MySQL's `AUTO_INCREMENT` or SQLite's `AUTOINCREMENT`
     /// - ...
@@ -1638,6 +1656,23 @@ pub enum ColumnOption {
     Invisible,
 }
 
+impl From<UniqueConstraint> for ColumnOption {
+    fn from(c: UniqueConstraint) -> Self {
+        ColumnOption::Unique(c)
+    }
+}
+
+impl From<PrimaryKeyConstraint> for ColumnOption {
+    fn from(c: PrimaryKeyConstraint) -> Self {
+        ColumnOption::PrimaryKey(c)
+    }
+}
+
+impl From<CheckConstraint> for ColumnOption {
+    fn from(c: CheckConstraint) -> Self {
+        ColumnOption::Check(c)
+    }
+}
 impl From<ForeignKeyConstraint> for ColumnOption {
     fn from(fk: ForeignKeyConstraint) -> Self {
         ColumnOption::ForeignKey(fk)
@@ -1660,12 +1695,16 @@ impl fmt::Display for ColumnOption {
                 }
             }
             Alias(expr) => write!(f, "ALIAS {expr}"),
-            Unique {
-                is_primary,
-                characteristics,
-            } => {
-                write!(f, "{}", if *is_primary { "PRIMARY KEY" } else { "UNIQUE" })?;
-                if let Some(characteristics) = characteristics {
+            PrimaryKey(constraint) => {
+                write!(f, "PRIMARY KEY")?;
+                if let Some(characteristics) = &constraint.characteristics {
+                    write!(f, " {characteristics}")?;
+                }
+                Ok(())
+            }
+            Unique(constraint) => {
+                write!(f, "UNIQUE")?;
+                if let Some(characteristics) = &constraint.characteristics {
                     write!(f, " {characteristics}")?;
                 }
                 Ok(())
@@ -1693,7 +1732,7 @@ impl fmt::Display for ColumnOption {
                 }
                 Ok(())
             }
-            Check(expr) => write!(f, "CHECK ({expr})"),
+            Check(constraint) => write!(f, "{constraint}"),
             DialectSpecific(val) => write!(f, "{}", display_separated(val, " ")),
             CharacterSet(n) => write!(f, "CHARACTER SET {n}"),
             Collation(n) => write!(f, "COLLATE {n}"),
@@ -3024,7 +3063,7 @@ pub struct CreateTrigger {
     /// FOR EACH ROW
     /// EXECUTE FUNCTION trigger_function();
     /// ```
-    pub period: TriggerPeriod,
+    pub period: Option<TriggerPeriod>,
     /// Whether the trigger period was specified before the target table name.
     /// This does not refer to whether the period is BEFORE, AFTER, or INSTEAD OF,
     /// but rather the position of the period clause in relation to the table name.
@@ -3093,14 +3132,18 @@ impl Display for CreateTrigger {
         )?;
 
         if *period_before_table {
-            write!(f, "{period}")?;
-            if !events.is_empty() {
-                write!(f, " {}", display_separated(events, " OR "))?;
+            if let Some(p) = period {
+                write!(f, "{p} ")?;
             }
-            write!(f, " ON {table_name}")?;
-        } else {
+            if !events.is_empty() {
+                write!(f, "{} ", display_separated(events, " OR "))?;
+            }
             write!(f, "ON {table_name}")?;
-            write!(f, " {period}")?;
+        } else {
+            write!(f, "ON {table_name} ")?;
+            if let Some(p) = period {
+                write!(f, "{p}")?;
+            }
             if !events.is_empty() {
                 write!(f, " {}", display_separated(events, ", "))?;
             }
