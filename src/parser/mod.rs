@@ -44,7 +44,6 @@ use crate::{
         },
         stmt_create_table::{CreateTableBuilder, CreateTableConfiguration},
     },
-    keywords::CREATE,
 };
 use sqlparser::parser::ParserState::ColumnDefinition;
 
@@ -541,7 +540,14 @@ impl<'a> Parser<'a> {
         if let Some(statement) = self.dialect.parse_statement(self) {
             return statement;
         }
-        let leading_comment: Option<Comment> = self.parse_leading_comment();
+        
+        let leading_comment: Option<Comment> = match &self.get_previous_token().token { 
+            Token::Whitespace(Whitespace::Comment(c)) => Some(c.clone()), 
+            _ => None, 
+        }; 
+            if leading_comment != None { 
+        } 
+        dbg!(&self.tokens);
         let next_token = self.next_token();
         match &next_token.token {
             Token::Word(w) => match w.keyword {
@@ -17800,7 +17806,6 @@ impl Word {
 mod tests {
     use super::*;
     use crate::test_utils::{all_dialects, TestedDialects};
-    use crate::tokenizer::Comment::{MultiLineComment, SingleLineComment};
 
     #[test]
     fn test_prev_index() {
@@ -18596,12 +18601,17 @@ mod tests {
 
     #[test]
     fn interstitial_and_leading_comments_singleline() {
-        use crate::tokenizer::Comment::{MultiLineComment, SingleLineComment};
+        use crate::tokenizer::Comment::SingleLineComment;
 
-        let sql_sl = "-- leading table comment
-    CREATE -- interstitial comment to ignore TABLE t (id -- interstitial column comment to ignore INT,
-    -- leading
-    name TEXT)";
+        let sql_sl = r#"-- leading table comment
+CREATE 
+-- interstitial comment to ignore 
+TABLE t (
+id 
+-- interstitial column comment to ignore 
+INT,
+-- leading
+name TEXT)"#;
         let mut stmts = Parser::parse_sql(&GenericDialect {}, sql_sl).unwrap();
         match stmts.remove(0) {
             Statement::CreateTable(ct) => {
